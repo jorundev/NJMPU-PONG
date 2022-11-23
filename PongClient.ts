@@ -1,3 +1,5 @@
+import { type WsPong, PongAction, type WsPongBounce, type WsPongReset } from "../websocket/types";
+import type { NewBallState } from "./Ball";
 import { PlayerRole, Pong, type BallOut } from "./Pong";
 
 interface PongWebsocket {
@@ -16,15 +18,31 @@ export class PongClient {
         //     this.clientGame.setBallState(state);
         // });
         this.clientGame.onPlayerMove((movement) => {
-            ws.send(JSON.stringify({
-                namespace: "PONG",
-                action: "MOVE",
-                movement,
-            }));
+            const {player, ...data} = movement;
+            if (movement.player === role) {
+                ws.send(JSON.stringify({
+                    namespace: "Pong",
+                    action: "MOVE",
+                    data,
+                }));
+            }
         });
         // this.clientGame.onBallOut((bo: BallOut) => {
         //     this.clientGame.reset(bo.player1Score, bo.player2Score);
         // });
+    }
+    
+    receivePacket(packet: WsPong) {
+        switch(packet.action) {
+            case PongAction.Bounce:
+                const bounceData = packet as WsPongBounce;
+                this.clientGame.setBallState(bounceData.data);
+                break ;
+                case PongAction.Reset:
+                const resetData = packet as WsPongReset;
+                this.clientGame.reset(resetData.data.player1Score, resetData.data.player2Score);
+                break ;
+        }
     }
     
     update(dt: number): void {
