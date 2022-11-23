@@ -1,20 +1,26 @@
 import { PlayerRole, Pong, type BallOut } from "./Pong";
 
+interface PongWebsocket {
+    send: (msg: string) => void;
+}
+
 export class PongClient {
     private clientGame: Pong;
     private role: PlayerRole;
     private shift = false;
     
-    constructor(role: PlayerRole) {
+    constructor(role: PlayerRole, ws: PongWebsocket) {
         this.role = role;
         this.clientGame = new Pong(8);
-        this.clientGame.onBallBounce((state) => {
-            this.clientGame.setBallState(state);
-        });
+        // this.clientGame.onBallBounce((state) => {
+        //     this.clientGame.setBallState(state);
+        // });
         this.clientGame.onPlayerMove((movement) => {
-           if (movement.player !== this.role) {
-               this.clientGame.setPlayerMoveTarget(movement.player, movement.moveTarget);
-           } 
+            ws.send(JSON.stringify({
+                namespace: "PONG",
+                action: "MOVE",
+                movement,
+            }));
         });
         // this.clientGame.onBallOut((bo: BallOut) => {
         //     this.clientGame.reset(bo.player1Score, bo.player2Score);
