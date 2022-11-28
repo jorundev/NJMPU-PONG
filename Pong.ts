@@ -13,6 +13,7 @@ export enum PlayerRole {
 
 export interface PongPacket {
 	tick: number;
+	time: number;
 }
 
 export interface PlayerMovement extends PongPacket {
@@ -28,6 +29,9 @@ export interface BallOut extends PongPacket {
 export class Pong {
 	static MAX_PLAYER_SPEED = 5.0 * (GAME_HEIGHT / 256);
 	static CENTER_LINE_WIDTH = 2.0 * (GAME_WIDTH / 512);
+	
+	private lastBallPosX = 0;
+	private lastBallPosY = 0;
 
 	private updateBall = true;
 
@@ -48,6 +52,7 @@ export class Pong {
 		if (this.onBallBounceCallback) {
 			this.onBallBounceCallback({
 				tick: this.currentTick,
+				time: +new Date(),
 				x: this.ball.x,
 				y: this.ball.y,
 				velX: this.ball.velocityX,
@@ -56,21 +61,73 @@ export class Pong {
 			});
 		}
 	}
-
-	private handleTicks(serverTick: number) {
-		const tickDiff = serverTick - this.currentTick;
-		if (tickDiff > 5) {
-			console.log('Server is ' + Math.abs(tickDiff) + ' ticks ahead');
-		} else if (serverTick - this.currentTick < -5) {
-			console.log('Server is ' + Math.abs(tickDiff) + ' ticks behind');
+	
+	private correctLag(serverTick: number, tickDiff: number, state: NewBallState) {
+		let correctedTick = this.currentTick;
+		
+		if (tickDiff < 0) {
+			this.currentTick = serverTick;
+			return ;
+		} else if (tickDiff > 0) {
+			correctedTick = serverTick;
 		}
+		
+		const newTickDiff = correctedTick - this.currentTick;
+		const correctedDt = newTickDiff / this.tickPerSecond;
+		
+		console.log("correction:", correctedDt * 1000, "ms");
+		
+		state.x += state.velX * state.speed * (correctedDt / 2);
+		state.y += state.velY * state.speed * (correctedDt / 2);
+		
+		this.currentTick = correctedTick;
+	}
 
-		this.currentTick = serverTick;
-		this.cumulated = this.currentTick / this.tickPerSecond;
+	private handleTicks(serverTick: number, state: NewBallState) {
+		// const tickDiff = serverTick - this.currentTick;
+		// let timeDiff = state.time - (+new Date());
+		
+		// console.log("ping:", timeDiff, "ms");
+	
+		// if (timeDiff < 0) {
+		// 	timeDiff = 0;
+		// }
+		
+		// timeDiff *= 2;
+		// timeDiff /= 1000;
+		
+		// console.log("correction:", timeDiff, "s");
+		
+		// if (timeDiff > 0.02) {
+		// 	state.x += state.velX * state.speed * timeDiff;
+		// 	state.y += state.velY * state.speed * timeDiff;
+		// }
+		
+		// if (Math.floor(tickDiff) > 100) {
+		// 	this.currentTick = serverTick;
+		// 	return ;
+		// }
+		// this.currentTick += tickDiff * 2;
+		//console.log("tick diff:", tickDiff);
+		// console.log("time diff:", state.time - (+new Date()), "ms");
+		// if (Math.abs(tickDiff) > 20) {
+		// } else {
+			//this.correctLag(serverTick, tickDiff, state);
+			// if (tickDiff > 0) {
+			// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks ahead');
+			// } else if (tickDiff < 0) {
+			// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks behind');
+			// }
+		// }
+		// this.cumulated = this.currentTick / this.tickPerSecond;
 	}
 
 	public setBallState(state: NewBallState) {
-		this.handleTicks(state.tick);
+		
+		this.lastBallPosX = state.x;
+		this.lastBallPosY = state.y;
+
+		// this.handleTicks(state.tick, state);
 
 		this.ball.x = state.x;
 		this.ball.y = state.y;
@@ -92,15 +149,16 @@ export class Pong {
 		return null;
 	}
 
-	setPlayerMoveTarget(role: PlayerRole, y: number) {
+	setPlayerMoveTarget(role: PlayerRole, y: number, send: boolean) {
 		const player = this.getPlayer(role);
 		if (player) {
 			player.moveTarget = y;
 		}
-		if (this.onPlayerMoveCallback && this.lastTickWithPlayerEvent !== this.currentTick) {
+		if (send && this.onPlayerMoveCallback && this.lastTickWithPlayerEvent !== this.currentTick) {
 			this.lastTickWithPlayerEvent = this.currentTick;
 			this.onPlayerMoveCallback({
 				tick: this.currentTick,
+				time: +new Date(),
 				player: role,
 				moveTarget: y,
 			});
@@ -149,7 +207,7 @@ export class Pong {
 	update(dt: number) {
 		this.cumulated += dt;
 		this.currentTick = Math.floor(this.cumulated * this.tickPerSecond);
-		if (this.currentTick % 10 === 0) {
+		if (this.currentTick % 2 === 0) {
 			this.sendBallBounceToCallback();
 		}
 		this.movePlayers();
@@ -163,6 +221,7 @@ export class Pong {
 			if (this.onBallOutCallback) {
 				this.onBallOutCallback({
 					tick: this.currentTick,
+					time: +new Date(),
 					player1Score: this.player1.score,
 					player2Score: this.player2.score + 1,
 				});
@@ -173,6 +232,7 @@ export class Pong {
 			if (this.onBallOutCallback) {
 				this.onBallOutCallback({
 					tick: this.currentTick,
+					time: +new Date(),
 					player1Score: this.player1.score + 1,
 					player2Score: this.player2.score,
 				});
@@ -201,6 +261,8 @@ export class Pong {
 	draw(ctx: CanvasRenderingContext2D) {
 		// clear canvas
 		ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+		
+		ctx.fillStyle = 'white';
 
 		// draw center line
 		ctx.fillRect(
@@ -218,5 +280,10 @@ export class Pong {
 		ctx.font = '100px tekoregular';
 		ctx.fillText(this.player1.score.toFixed(), GAME_WIDTH / 4, 28 * (GAME_HEIGHT / 256));
 		ctx.fillText(this.player2.score.toFixed(), GAME_WIDTH * (3 / 4), 28 * (GAME_HEIGHT / 256));
+		
+		// ctx.beginPath();
+        // ctx.arc(this.lastBallPosX, this.lastBallPosY, 3 * (GAME_HEIGHT / 256), 0, 2 * Math.PI);
+        // ctx.fillStyle = 'red';
+        // ctx.fill();
 	}
 }

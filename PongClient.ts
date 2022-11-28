@@ -43,7 +43,7 @@ export class PongClient {
 				break ;
 			case PongAction.Move:
 				const moveData = packet as WsPongMove;
-				this.clientGame.setPlayerMoveTarget(moveData.player, moveData.data.moveTarget);
+				this.clientGame.setPlayerMoveTarget(moveData.player, moveData.data.moveTarget, false);
 				break ;
         }
     }
@@ -59,13 +59,13 @@ export class PongClient {
     moveUp() {
         const speed = this.shift ? Pong.MAX_PLAYER_SPEED : Pong.MAX_PLAYER_SPEED / 2;
         const newY = this.clientGame.getPlayerY(this.role) - speed;
-        this.clientGame.setPlayerMoveTarget(this.role, newY);
+        this.clientGame.setPlayerMoveTarget(this.role, newY, true);
     }
 
     moveDown() {
         const speed = this.shift ? Pong.MAX_PLAYER_SPEED : Pong.MAX_PLAYER_SPEED / 2;
         const newY = this.clientGame.getPlayerY(this.role) + speed;
-        this.clientGame.setPlayerMoveTarget(this.role, newY);
+        this.clientGame.setPlayerMoveTarget(this.role, newY, true);
     }
 
     setShift(shift: boolean) {
@@ -73,6 +73,6 @@ export class PongClient {
     }
 
     onMouseMove(mouseX: number, mouseY: number) {
-        this.clientGame.setPlayerMoveTarget(this.role, mouseY);
+        this.clientGame.setPlayerMoveTarget(this.role, mouseY, true);
     }
 }
