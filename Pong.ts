@@ -76,6 +76,7 @@ export class Pong {
 		this.ball.y = state.y;
 		this.ball.velocityX = state.velX;
 		this.ball.velocityY = state.velY;
+		this.ball.speed = state.speed;
 	}
 
 	constructor(tickPerSecond: number) {
