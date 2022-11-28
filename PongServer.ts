@@ -26,7 +26,7 @@ export class PongServer {
 		this.player1_ws = player1_ws;
 		this.player2_ws = player2_ws;
 
-		this.spectators_ws = spectators_ws;
+		this.updateSpectators(spectators_ws);
 
 		this.gameState.onBallBounce((nbs: NewBallState) => {
 			const data = JSON.stringify({
@@ -50,6 +50,10 @@ export class PongServer {
 			this.greenThread(this.dispatch, data);
 			this.gameState.reset(bo.player1Score, bo.player2Score);
 		});
+	}
+
+	updateSpectators(spectators_ws: Array<WebSocketUser>) {
+		this.spectators_ws = spectators_ws;
 	}
 
 	async greenThread(fn: Function, data: any) {
