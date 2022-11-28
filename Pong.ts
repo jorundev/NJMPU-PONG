@@ -276,6 +276,8 @@ export class Pong {
 		this.ball.draw(ctx);
 		this.player1.draw(ctx);
 		this.player2.draw(ctx);
+		
+		ctx.fillStyle = 'white';
 
 		ctx.font = '100px tekoregular';
 		ctx.fillText(this.player1.score.toFixed(), GAME_WIDTH / 4, 28 * (GAME_HEIGHT / 256));

@@ -11,6 +11,8 @@ export class Player implements GameObject {
 	
 	private WIDTH = 4 * (GAME_WIDTH / 512);
 	private HEIGHT = 28 * (GAME_HEIGHT / 256);
+	
+	private color = 'white';
 
 	constructor(x: number, throwDirection: Direction) {
 		this.x = x;
@@ -54,5 +56,7 @@ export class Player implements GameObject {
 	draw(ctx: CanvasRenderingContext2D): void {
 		ctx.fillStyle = 'white';
         ctx.fillRect(this.x - (this.WIDTH / 2), this.y - (this.HEIGHT / 2), this.WIDTH, this.HEIGHT);
+		ctx.fillStyle = this.color;
+        ctx.fillRect(this.x - (this.WIDTH / 2) + 2, this.y - (this.HEIGHT / 2) + 2, this.WIDTH - 4, this.HEIGHT - 4);
 	}
 }
