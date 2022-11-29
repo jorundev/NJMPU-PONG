@@ -30,6 +30,10 @@ export class PongClient {
         //     this.clientGame.reset(bo.player1Score, bo.player2Score);
         // });
     }
+    
+    setColors(colors: [string, string]) {
+        this.clientGame.setColors(colors);
+    }
 
     receivePacket(packet: WsPong) {
         switch(packet.action) {

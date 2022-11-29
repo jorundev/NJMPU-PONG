@@ -62,6 +62,11 @@ export class Pong {
 		}
 	}
 	
+	setColors(colors: [string, string]) {
+		this.player1.setColor(colors[0]);
+		this.player2.setColor(colors[1]);
+	}
+	
 	private correctLag(serverTick: number, tickDiff: number, state: NewBallState) {
 		let correctedTick = this.currentTick;
 		

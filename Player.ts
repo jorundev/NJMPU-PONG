@@ -32,6 +32,10 @@ export class Player implements GameObject {
 		return this.y;
 	}
 	
+	setColor(color: string) {
+		this.color = color;
+	}
+	
 	getThrowDirection(): number {
 		return this.throwDirection;
 	}
