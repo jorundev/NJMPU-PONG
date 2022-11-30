@@ -2,6 +2,7 @@ export interface Ranking {
 	rank: string;
 	level: number;
 	xp: number;
+	xp_end: number;
 }
 
 export class PongRanking {
@@ -73,10 +74,14 @@ export class PongRanking {
 			i++;
 		}
 
+		const scaled_xp = xp - this.levels_xp[i - 1];
+
 		return {
 			rank: this.angels[i - 1],
 			level: i,
-			xp: xp - this.levels_xp[i - 1],
+			xp: scaled_xp,
+			xp_end:
+				i === this.levels_xp.length ? scaled_xp : this.levels_xp[i] - this.levels_xp[i - 1],
 		};
 	}
 
