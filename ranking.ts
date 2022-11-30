@@ -9,15 +9,16 @@ export class PongRanking {
 	private readonly levels_xp: Array<number> = this.generateLevels();
 	private readonly scaling = {
 		default: {
-			value: 2,
+			value: 5,
+			multiplier: 2,
 		},
 		private: {
 			win: 2,
-			loose: 0,
+			loose: 0.5,
 		},
 		ranked: {
 			win: 4,
-			loose: 1,
+			loose: 1.5,
 		},
 	};
 	readonly angels: Array<string> = [
@@ -88,13 +89,29 @@ export class PongRanking {
 	getXP(score: number, win: boolean, ranked: boolean) {
 		if (ranked) {
 			if (win) {
-				return score * this.scaling.default.value * this.scaling.ranked.win;
+				return Math.floor(
+					(score + this.scaling.default.value) *
+						this.scaling.default.multiplier *
+						this.scaling.ranked.win,
+				);
 			}
-			return score * this.scaling.default.value * this.scaling.ranked.loose;
+			return Math.floor(
+				(score + this.scaling.default.value) *
+					this.scaling.default.multiplier *
+					this.scaling.ranked.loose,
+			);
 		}
 		if (win) {
-			return score * this.scaling.default.value * this.scaling.private.loose;
+			return Math.floor(
+				(score + this.scaling.default.value) *
+					this.scaling.default.multiplier *
+					this.scaling.private.loose,
+			);
 		}
-		return score * this.scaling.default.value * this.scaling.private.loose;
+		return Math.floor(
+			(score + this.scaling.default.value) *
+				this.scaling.default.multiplier *
+				this.scaling.private.loose,
+		);
 	}
 }
