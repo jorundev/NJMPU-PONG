@@ -210,6 +210,10 @@ export class Pong {
 	}
 
 	update(dt: number) {
+		// That's too much
+		if (dt > 2) {
+			return ;
+		}
 		this.cumulated += dt;
 		this.currentTick = Math.floor(this.cumulated * this.tickPerSecond);
 		if (this.currentTick % 2 === 0) {
@@ -217,7 +221,7 @@ export class Pong {
 		}
 		this.movePlayers();
 
-		if (this.updateBall) {
+		if (this.updateBall && this.cumulated > 3) {
 			this.ball.update(dt);
 		}
 
