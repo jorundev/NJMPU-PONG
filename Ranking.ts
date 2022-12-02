@@ -14,7 +14,7 @@ export class PongRanking {
 		},
 		private: {
 			win: 2,
-			loose: 0.5,
+			loose: 1,
 		},
 		ranked: {
 			win: 4,
@@ -105,7 +105,7 @@ export class PongRanking {
 			return Math.floor(
 				(score + this.scaling.default.value) *
 					this.scaling.default.multiplier *
-					this.scaling.private.loose,
+					this.scaling.private.win,
 			);
 		}
 		return Math.floor(
