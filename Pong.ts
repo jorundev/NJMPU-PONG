@@ -29,7 +29,7 @@ export interface BallOut extends PongPacket {
 export class Pong {
 	static MAX_PLAYER_SPEED = 5.0 * (GAME_HEIGHT / 256);
 	static CENTER_LINE_WIDTH = 2.0 * (GAME_WIDTH / 512);
-	
+
 	private lastBallPosX = 0;
 	private lastBallPosY = 0;
 
@@ -61,53 +61,47 @@ export class Pong {
 			});
 		}
 	}
-	
+
 	setColors(colors: [string, string]) {
 		this.player1.setColor(colors[0]);
 		this.player2.setColor(colors[1]);
 	}
-	
+
 	private correctLag(serverTick: number, tickDiff: number, state: NewBallState) {
 		let correctedTick = this.currentTick;
-		
+
 		if (tickDiff < 0) {
 			this.currentTick = serverTick;
-			return ;
+			return;
 		} else if (tickDiff > 0) {
 			correctedTick = serverTick;
 		}
-		
+
 		const newTickDiff = correctedTick - this.currentTick;
 		const correctedDt = newTickDiff / this.tickPerSecond;
-		
-		console.log("correction:", correctedDt * 1000, "ms");
-		
+
+		console.log('correction:', correctedDt * 1000, 'ms');
+
 		state.x += state.velX * state.speed * (correctedDt / 2);
 		state.y += state.velY * state.speed * (correctedDt / 2);
-		
+
 		this.currentTick = correctedTick;
 	}
 
 	private handleTicks(serverTick: number, state: NewBallState) {
 		// const tickDiff = serverTick - this.currentTick;
 		// let timeDiff = state.time - (+new Date());
-		
 		// console.log("ping:", timeDiff, "ms");
-	
 		// if (timeDiff < 0) {
 		// 	timeDiff = 0;
 		// }
-		
 		// timeDiff *= 2;
 		// timeDiff /= 1000;
-		
 		// console.log("correction:", timeDiff, "s");
-		
 		// if (timeDiff > 0.02) {
 		// 	state.x += state.velX * state.speed * timeDiff;
 		// 	state.y += state.velY * state.speed * timeDiff;
 		// }
-		
 		// if (Math.floor(tickDiff) > 100) {
 		// 	this.currentTick = serverTick;
 		// 	return ;
@@ -117,18 +111,17 @@ export class Pong {
 		// console.log("time diff:", state.time - (+new Date()), "ms");
 		// if (Math.abs(tickDiff) > 20) {
 		// } else {
-			//this.correctLag(serverTick, tickDiff, state);
-			// if (tickDiff > 0) {
-			// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks ahead');
-			// } else if (tickDiff < 0) {
-			// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks behind');
-			// }
+		//this.correctLag(serverTick, tickDiff, state);
+		// if (tickDiff > 0) {
+		// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks ahead');
+		// } else if (tickDiff < 0) {
+		// 	console.log('Server is ' + Math.abs(tickDiff) + ' ticks behind');
+		// }
 		// }
 		// this.cumulated = this.currentTick / this.tickPerSecond;
 	}
 
 	public setBallState(state: NewBallState) {
-		
 		this.lastBallPosX = state.x;
 		this.lastBallPosY = state.y;
 
@@ -159,7 +152,11 @@ export class Pong {
 		if (player) {
 			player.moveTarget = y;
 		}
-		if (send && this.onPlayerMoveCallback && this.lastTickWithPlayerEvent !== this.currentTick) {
+		if (
+			send &&
+			this.onPlayerMoveCallback &&
+			this.lastTickWithPlayerEvent !== this.currentTick
+		) {
 			this.lastTickWithPlayerEvent = this.currentTick;
 			this.onPlayerMoveCallback({
 				tick: this.currentTick,
@@ -212,7 +209,7 @@ export class Pong {
 	update(dt: number) {
 		// That's too much
 		if (dt > 2) {
-			return ;
+			return;
 		}
 		this.cumulated += dt;
 		this.currentTick = Math.floor(this.cumulated * this.tickPerSecond);
@@ -270,7 +267,7 @@ export class Pong {
 	draw(ctx: CanvasRenderingContext2D) {
 		// clear canvas
 		ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-		
+
 		ctx.fillStyle = 'white';
 
 		// draw center line
@@ -285,16 +282,16 @@ export class Pong {
 		this.ball.draw(ctx);
 		this.player1.draw(ctx);
 		this.player2.draw(ctx);
-		
+
 		ctx.fillStyle = 'white';
 
 		ctx.font = '100px tekoregular';
 		ctx.fillText(this.player1.score.toFixed(), GAME_WIDTH / 4, 28 * (GAME_HEIGHT / 256));
 		ctx.fillText(this.player2.score.toFixed(), GAME_WIDTH * (3 / 4), 28 * (GAME_HEIGHT / 256));
-		
+
 		// ctx.beginPath();
-        // ctx.arc(this.lastBallPosX, this.lastBallPosY, 3 * (GAME_HEIGHT / 256), 0, 2 * Math.PI);
-        // ctx.fillStyle = 'red';
-        // ctx.fill();
+		// ctx.arc(this.lastBallPosX, this.lastBallPosY, 3 * (GAME_HEIGHT / 256), 0, 2 * Math.PI);
+		// ctx.fillStyle = 'red';
+		// ctx.fill();
 	}
 }
